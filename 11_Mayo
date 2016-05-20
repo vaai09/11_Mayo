@@ -1,0 +1,162 @@
+# 11_Mayo
+########Suavizamiento Exponencial Simple SES###########
+#Sirve para pronosticar st que no tengan tendencia ni estacionalidad. Por ejemplo:
+
+##Metodo ingenuo: utiliza la observacion como la mas importante, lo que puede ser visto como el peso 
+##promedio donde todo el peso se otorga a la última observacion.
+
+#Metodo de la media: utiliza un promedio de observaciones por lo que asume que todas las observaciones
+#tienen el mismo peso cundo se generen pronosticos.
+
+#El concepto central del modelo SES es otorgar un mayor peso a las observaciones recientes de tal forma
+#que lo pronosticos se calculan utilizando promedios ponderados donde los pesos disminuyen 
+#exponencialmente de las observaciones mas antiguas.
+
+install.packages("forecast")
+require (forecast)
+require (fpp)
+deso <- read.csv ("C:\\Users\\Lidia\\Desktop\\ind_lab.csv")
+labo <- ts (deso,start =2005, frequency = 4)
+mod1 <- ses(labo, alpha=0.2, initial="simple", h=4)
+mod2 <- ses(labo, alpha=0.6, initial="simple", h=4)
+mod3 <- ses(labo, alpha=1, initial="simple", h=4)
+plot(mod1, plot.conf=FALSE, ylab="desocupa",
+     xlab="Year", main="", fcol="white", type="o")
+
+###Graficando los ajustes: los valores que el modelo SES calcularia desde el inicio
+lines(fitted(mod1), col="blue", type="o")
+lines(fitted(mod2), col="red", type="o")
+lines(fitted(mod3), col="green", type="o")
+
+####Graficando la media del pronostico de cada uno de los modelos
+lines(mod1$mean, col="blue", type="o")
+lines(mod2$mean, col="red", type="o")
+lines(mod3$mean, col="green", type="o")
+legend("topleft",lty=1, col=c(1,"blue","red","green"), 
+       c("data", expression(alpha == 0.2), expression(alpha == 0.6),
+         expression(alpha == 1)),pch=1)
+
+names (mod1)
+aju1 <- mod1$fitted
+aju2 <- mod1$fitted
+aju3 <- mod1$fitted
+resmod1 <- (labo - aju1)
+resmod2 <- (labo - aju2)
+resmod3 <- (labo - aju3)
+mod123 <- data.frame(labo, aju1, aju2, aju3, resmod1, resmod2, resmod3)
+View (mod123)
+res1 <- (resmod1- mod1$residuals)
+res2 <- (resmod1- mod2$residuals)
+res3 <- (resmod1- mod3$residuals)
+
+
+##Una vez que obtengan la grafica de los tres modelos.... generar en excel una hoja donde nos 
+##muestre los datos ajustados (fitted) y se resten a los valores reales... de ahi ver segun 
+#los residuales que modelo es mejor , tambien obtener el MAE, RMSE, MAPE Y SSE
+
+####################EJERCICIO#######################################
+###ELEGIR DOS SERIES DE TIEMPO SIN TENDENCIA NO ESTACIONALIDAD
+###SERIE1 ALPHA=0.1, 0.6 Y 0.9
+###SERIE2 ALPHA=0.0001, 0.5 Y 0.987
+###GRAFICAR LAS SERIES DE TIEMPO
+###CALCULAR EL MAE, RMSE, MAPE Y SSE
+###DECIDIR EN CADA UNA DE LAS SERIES CUALE SES OCUPARIAN
+###CON BASE EN LOS MAE, RMSE MAPE Y SSE
+###ARGUMENTEN PORQUE UDS CREES QUE ES MEJOR UTILIZAR UN ALPHA CERCANO A 0 O A 1
+
+tasas <- read.csv ("C:\\Users\\Lidia\\Desktop\\tasas.csv")
+serie1 <- ts (tasas[,3],start =2005, frequency = 4)
+serie1
+
+#######Metodo de la media###########
+meanf(serie1)
+ser1pro <- meanf(serie1,4)
+plot(ser1pro)
+########## ingenuo###############
+ser1nai <- naive(serie1, 4)
+plot (ser1nai)
+### ingenuo estacional
+ser1snai <- snaive(serie1, 4)
+plot(ser1snai)
+########## metodo de la deriva
+ser1der <- rwf(serie1, 4, drift = T)
+plot (ser1der)
+
+evalmed1<-accuracy(ser1pro)
+evaling1<-accuracy(ser1nai)
+evalsnai1<-accuracy(ser1snai)
+evalder1<-accuracy(ser1der)
+
+##AME,MAPE,RMSE,MASE -> cercanos a cero
+evalmed1
+evaling1
+evalsnai1
+evalder1
+
+###SERIE1 ALPHA=0.1, 0.6 Y 0.9
+modelo1 <- ses(serie1, alpha=0.1, initial="simple", h=4)
+modelo2 <- ses(serie1, alpha=0.6, initial="simple", h=4)
+modelo3 <- ses(serie1, alpha=0.9, initial="simple", h=4)
+plot(modelo1, plot.conf=FALSE, ylab="Tasa de ocupación parcial y desocupación",
+     xlab="Year", main="", fcol="white", type="o")
+
+###Graficando los ajustes: los valores que mi mdelo SES que calcularia desde el inicio
+lines(fitted(modelo1), col="blue", type="o")
+lines(fitted(modelo2), col="red", type="o")
+lines(fitted(modelo3), col="orange", type="o")
+
+####Graficando la media del pronostico de cada uno de los modelos
+lines(modelo1$mean, col="blue", type="o")
+lines(modelo2$mean, col="red", type="o")
+lines(modelo3$mean, col="orange", type="o")
+legend("topleft",lty=1, col=c(1,"blue","red","orange"), 
+       c("data", expression(alpha == 0.1), expression(alpha == 0.6),
+         expression(alpha == 0.9)),pch=1)
+
+
+serie2 <- ts (tasas[,4],start =2005, frequency = 4)
+serie2
+#######Metodo de la media###########
+meanf(serie2)
+ser2pro <- meanf(serie2,4)
+plot(ser2pro)
+########## ingenuo###############
+ser2nai <- naive(serie2, 4)
+plot (ser2nai)
+### ingenuo estacional
+ser2snai <- snaive(serie2, 4)
+plot(ser1snai)
+########## metodo de la deriva
+ser2der <- rwf(serie2, 4, drift = T)
+plot (ser2der)
+
+evalmed2<-accuracy(ser2pro)
+evaling2<-accuracy(ser2nai)
+evalsnai2<-accuracy(ser2snai)
+evalder2<-accuracy(ser2der)
+
+##AME,MAPE,RMSE,MASE -> cercanos a cero
+evalmed2
+evaling2
+evalsnai2
+evalder2
+
+###SERIE2 ALPHA=0.0001, 0.5 Y 0.987
+modelo12 <- ses(serie2, alpha=0.0001, initial="simple", h=4)
+modelo22 <- ses(serie2, alpha=0.5, initial="simple", h=4)
+modelo32 <- ses(serie2, alpha=0.987, initial="simple", h=4)
+plot(modelo12, plot.conf=FALSE, ylab="Tasa de presión general",
+     xlab="Year", main="", fcol="white", type="o")
+
+###Graficando los ajustes: los valores que mi mdelo SES que calcularia desde el inicio
+lines(fitted(modelo12), col="blue", type="o")
+lines(fitted(modelo22), col="red", type="o")
+lines(fitted(modelo32), col="green", type="o")
+
+####Graficando la media del pronostico de cada uno de los modelos
+lines(modelo12$mean, col="blue", type="o")
+lines(modelo22$mean, col="red", type="o")
+lines(modelo32$mean, col="green", type="o")
+legend("topleft",lty=1, col=c(1,"blue","red","green"), 
+       c("data", expression(alpha == 0.0001), expression(alpha == 0.5),
+         expression(alpha == 0.987)),pch=1)
